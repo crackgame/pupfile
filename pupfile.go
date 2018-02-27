@@ -145,3 +145,7 @@ func (pf *PupFile) GetPageImage(index int) []byte {
 	data := pf.getFileBytes(pf.desc.Pages[index].Image)
 	return data
 }
+
+func (pf *PupFile) GetCoverImage() []byte {
+	return pf.GetPageImage(0)
+}
