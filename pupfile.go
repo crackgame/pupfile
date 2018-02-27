@@ -2,6 +2,7 @@ package pupfile
 
 import (
 	"archive/zip"
+	"bytes"
 	"errors"
 	"io/ioutil"
 	"log"
@@ -18,7 +19,7 @@ var (
 type PupFile struct {
 	desc *BookDesc
 	w    *zip.Writer
-	r    *zip.ReadCloser
+	r    *zip.Reader
 }
 
 func NewPupFile() *PupFile {
@@ -42,8 +43,25 @@ func (pf *PupFile) Create(zipFileName string) error {
 
 func (pf *PupFile) Open(zipFileName string) error {
 	// Open a zip archive for reading.
+	rc, err := zip.OpenReader(zipFileName)
+	if err != nil {
+		return err
+	}
+
+	pf.r = &rc.Reader
+
+	pf.desc = NewBookDesc()
+	data := pf.getFileBytes(DescFileName)
+	pf.desc.FromBytes(data)
+
+	return nil
+}
+
+func (pf *PupFile) OpenFromStream(stream []byte) error {
+	// Open a zip archive for reading.
 	var err error
-	pf.r, err = zip.OpenReader(zipFileName)
+	r := bytes.NewReader(stream)
+	pf.r, err = zip.NewReader(r, int64(len(stream)))
 	if err != nil {
 		return err
 	}
