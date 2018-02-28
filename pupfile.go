@@ -121,7 +121,11 @@ func (pf *PupFile) addDesc() {
 }
 
 func (pf *PupFile) addFile(filename string, bytes []byte) bool {
-	f, err := pf.w.Create(filename)
+	header := &zip.FileHeader{
+		Name:   filename,
+		Method: zip.Store,
+	}
+	f, err := pf.w.CreateHeader(header)
 	if err != nil {
 		log.Fatal(err)
 		return false
